@@ -18,8 +18,8 @@ ASTEROID_SCALES = {BIG: 1.0,
                    MEDIUM: 0.5,
                    SMALL: 0.25}
 ASTEROID_RADIUSES = {BIG: 35,
-                   MEDIUM: 35/2,
-                   SMALL: 35/1.5}
+                     MEDIUM: 35 / 2,
+                     SMALL: 35 / 1.5}
 ASTEROIDS_SCORE = {BIG: 20,
                    MEDIUM: 50,
                    SMALL: 100}

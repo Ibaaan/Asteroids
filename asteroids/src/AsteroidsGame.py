@@ -1,7 +1,9 @@
 import pygame
-from pygame import Vector2
 
-from asteroids.resources.settings import *
+from asteroids.resources.settings import (HEIGHT, WIDTH,
+                                          CLOCKWISE, COUNTER_CLOCKWISE,
+                                          ASTEROIDS_SCORE,
+                                          MIN_ASTEROID_DISTANCE, BIG)
 from asteroids.resources.utils import get_random_position
 from asteroids.src.GameObjects import Ship, Asteroid
 
@@ -43,7 +45,7 @@ class AsteroidsGame:
                 pygame.quit()
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_SPACE:
-                     self.ship.shoot()
+                    self.ship.shoot()
                 if e.key == pygame.K_r:
                     self.init_game_objects()
 
@@ -88,8 +90,8 @@ class AsteroidsGame:
                     self.asteroids.remove(asteroid)
                     try:
                         self.bullets.remove(bullet)
-                    except:
-                        pass
+                    except ValueError as e:
+                        print(e)
 
                     asteroid.split()
 
@@ -118,11 +120,12 @@ class AsteroidsGame:
             while True:
                 position = get_random_position()
                 if (
-                    position.distance_to(self.ship.position)
-                    > MIN_ASTEROID_DISTANCE
+                        position.distance_to(self.ship.position)
+                        > MIN_ASTEROID_DISTANCE
                 ):
                     break
-            self.asteroids.append(Asteroid(BIG, position, self.asteroids.append))
+            self.asteroids.append(Asteroid(BIG, position,
+                                           self.asteroids.append))
 
     def game_over_screen(self):
         font = pygame.font.SysFont('couriernew', 60)

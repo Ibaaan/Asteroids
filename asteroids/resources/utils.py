@@ -18,7 +18,7 @@ def get_random_vel_dir(min_speed, max_speed):
 
 
 def load_sprite(name):
-    path = os.path.join("resources","sprites",f"{name}.png")
+    path = os.path.join("resources", "sprites", f"{name}.png")
     loaded_sprite = load(path)
     return loaded_sprite
 
@@ -33,5 +33,6 @@ def sprite_for_asteroid(size_name):
         name = 'small_rock'
     return load_sprite(name + str(number))
 
+
 def get_random_position():
-     return Vector2(random.randint(0, WIDTH), random.randint(0, HEIGHT))
+    return Vector2(random.randint(0, WIDTH), random.randint(0, HEIGHT))

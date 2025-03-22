@@ -1,9 +1,8 @@
-import math
-
 import pygame
 from pygame.math import Vector2
 
-from asteroids.resources.settings import *
+from asteroids.resources.settings import WIDTH, HEIGHT, ANGULAR_VELOCITY, MAX_VELOCITY, BULLET_SPEED, \
+    DECELERATION_FACTOR, DBL_EPSILON, ASTEROID_RADIUSES
 from asteroids.resources.utils import wrap_position, get_random_vel_dir, load_sprite, sprite_for_asteroid
 
 
@@ -35,7 +34,6 @@ class Ship(_GameObject):
         self.create_bullet = create_bullet
         super().__init__(0, Vector2(0, -1), Vector2(WIDTH/2, HEIGHT/2), load_sprite("ship_stay"),
                          10)
-        print(1)
 
     def rotate(self, clockwise):
         """
@@ -69,7 +67,6 @@ class Ship(_GameObject):
         self.sprite = load_sprite("ship_stay")
 
     def move(self):
-        # print(self.last_direction, self.direction)
         new_position = self.position + self.last_direction * self.velocity
         self.position = wrap_position(new_position)
 
