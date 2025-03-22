@@ -1,3 +1,4 @@
+import os
 import random
 
 from pygame.image import load
@@ -17,7 +18,7 @@ def get_random_vel_dir(min_speed, max_speed):
 
 
 def load_sprite(name):
-    path = rf"resources\sprites\{name}.png"
+    path = os.path.join("resources","sprites",f"{name}.png")
     loaded_sprite = load(path)
     return loaded_sprite
 
