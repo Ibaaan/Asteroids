@@ -139,7 +139,7 @@ class AsteroidsGame:
 
         font = pygame.font.SysFont('couriernew', 40)
         space = font.render('R to restart', True, 'white')
-        space_rect = score.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 180))
+        space_rect = space.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 180))
         self.screen.blit(space, space_rect)
 
     def print_score(self):
