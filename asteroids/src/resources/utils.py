@@ -4,7 +4,7 @@ import random
 from pygame.image import load
 from pygame.math import Vector2
 
-from asteroids.resources.settings import WIDTH, HEIGHT
+from asteroids.src.resources.settings import WIDTH, HEIGHT
 
 
 def wrap_position(new_position: Vector2):

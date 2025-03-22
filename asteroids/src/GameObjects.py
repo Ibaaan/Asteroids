@@ -1,18 +1,18 @@
 import pygame
 from pygame.math import Vector2
 
-from asteroids.resources.settings import (WIDTH,
-                                          HEIGHT,
-                                          ANGULAR_VELOCITY,
-                                          MAX_VELOCITY,
-                                          BULLET_SPEED,
-                                          DECELERATION_FACTOR,
-                                          DBL_EPSILON, ASTEROID_RADIUSES,
-                                          MIN_ASTEROID_V, MAX_ASTEROID_V)
-from asteroids.resources.utils import (wrap_position,
-                                       get_random_vel_dir,
-                                       load_sprite,
-                                       sprite_for_asteroid)
+from asteroids.src.resources.settings import (WIDTH,
+                                              HEIGHT,
+                                              ANGULAR_VELOCITY,
+                                              MAX_VELOCITY,
+                                              BULLET_SPEED,
+                                              DECELERATION_FACTOR,
+                                              DBL_EPSILON, ASTEROID_RADIUSES,
+                                              MIN_ASTEROID_V, MAX_ASTEROID_V)
+from asteroids.src.resources.utils import (wrap_position,
+                                           get_random_vel_dir,
+                                           load_sprite,
+                                           sprite_for_asteroid)
 
 
 class _GameObject:

@@ -1,10 +1,10 @@
 import pygame
 
-from asteroids.resources.settings import (HEIGHT, WIDTH,
-                                          CLOCKWISE, COUNTER_CLOCKWISE,
-                                          ASTEROIDS_SCORE,
-                                          MIN_ASTEROID_DISTANCE, BIG)
-from asteroids.resources.utils import get_random_position
+from asteroids.src.resources.settings import (HEIGHT, WIDTH,
+                                              CLOCKWISE, COUNTER_CLOCKWISE,
+                                              ASTEROIDS_SCORE,
+                                              MIN_ASTEROID_DISTANCE, BIG)
+from asteroids.src.resources.utils import get_random_position
 from asteroids.src.GameObjects import Ship, Asteroid
 
 
