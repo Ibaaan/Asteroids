@@ -1,13 +1,23 @@
 import pygame
 from pygame.math import Vector2
 
-from asteroids.resources.settings import WIDTH, HEIGHT, ANGULAR_VELOCITY, MAX_VELOCITY, BULLET_SPEED, \
-    DECELERATION_FACTOR, DBL_EPSILON, ASTEROID_RADIUSES
-from asteroids.resources.utils import wrap_position, get_random_vel_dir, load_sprite, sprite_for_asteroid
+from asteroids.resources.settings import (WIDTH,
+                                          HEIGHT,
+                                          ANGULAR_VELOCITY,
+                                          MAX_VELOCITY,
+                                          BULLET_SPEED,
+                                          DECELERATION_FACTOR,
+                                          DBL_EPSILON, ASTEROID_RADIUSES,
+                                          MIN_ASTEROID_V, MAX_ASTEROID_V)
+from asteroids.resources.utils import (wrap_position,
+                                       get_random_vel_dir,
+                                       load_sprite,
+                                       sprite_for_asteroid)
 
 
 class _GameObject:
-    def __init__(self, velocity: float, direction: Vector2, position: Vector2, sprite, radius):
+    def __init__(self, velocity: float, direction: Vector2,
+                 position: Vector2, sprite, radius):
         self.position = position
         self.direction = direction
         self.velocity = velocity
@@ -32,7 +42,9 @@ class Ship(_GameObject):
 
         self.last_direction = Vector2()
         self.create_bullet = create_bullet
-        super().__init__(0, Vector2(0, -1), Vector2(WIDTH/2, HEIGHT/2), load_sprite("ship_stay"),
+        super().__init__(0, Vector2(0, -1),
+                         Vector2(WIDTH / 2, HEIGHT / 2),
+                         load_sprite("ship_stay"),
                          10)
 
     def rotate(self, clockwise):
@@ -47,7 +59,6 @@ class Ship(_GameObject):
         self.velocity = MAX_VELOCITY
         self.last_direction.update(self.direction)
         self.sprite = load_sprite("ship_move")
-
 
     def shoot(self):
         bullet = Bullet(self.position, BULLET_SPEED, self.direction)
@@ -71,7 +82,6 @@ class Ship(_GameObject):
         self.position = wrap_position(new_position)
 
 
-
 class Asteroid(_GameObject):
     def __init__(self, size_name, position, create_asteroid):
         """
@@ -79,23 +89,26 @@ class Asteroid(_GameObject):
         """
         self.create_asteroid = create_asteroid
         self.size_name = size_name
-        velocity, direction = get_random_vel_dir(MIN_ASTEROID_V, MAX_ASTEROID_V)
+        velocity, direction = get_random_vel_dir(MIN_ASTEROID_V,
+                                                 MAX_ASTEROID_V)
         super().__init__(velocity, direction, position,
-                         sprite_for_asteroid(size_name), ASTEROID_RADIUSES.get(size_name))
+                         sprite_for_asteroid(size_name),
+                         ASTEROID_RADIUSES.get(size_name))
 
     def split(self):
         if self.size_name > 1:
             for _ in range(2):
                 self.create_asteroid(
-                    Asteroid(self.size_name - 1, self.position, self.create_asteroid))
+                    Asteroid(self.size_name - 1,
+                             self.position, self.create_asteroid))
 
 
 class Bullet(_GameObject):
     def __init__(self, position, velocity, direction):
         new_direction = Vector2(0, 0)
         new_direction.update(direction)
-        super().__init__(velocity, new_direction, position, load_sprite('bullet'), 3)
+        super().__init__(velocity, new_direction,
+                         position, load_sprite('bullet'), 3)
 
     def move(self):
         self.position = self.position + self.direction * self.velocity
-
