@@ -1,14 +1,17 @@
 import pygame
 
-from asteroids.src.resources.settings import (HEIGHT, WIDTH,
-                                              CLOCKWISE, COUNTER_CLOCKWISE,
-                                              ASTEROIDS_SCORE,
-                                              MIN_ASTEROID_DISTANCE, BIG)
-from asteroids.src.resources.utils import get_random_position
-from asteroids.src.GameObjects import Ship, Asteroid
+from resources.settings import (HEIGHT, WIDTH,
+                                CLOCKWISE, COUNTER_CLOCKWISE,
+                                ASTEROIDS_SCORE,
+                                MIN_ASTEROID_DISTANCE, BIG)
+from resources.utils import get_random_position
+from src.GameObjects import Ship, Asteroid, GameObject
 
 
 class AsteroidsGame:
+    """
+    Класс со всей общей логикой
+    """
 
     def __init__(self):
         self.level = None
@@ -38,7 +41,7 @@ class AsteroidsGame:
 
     def _controller(self):
         """
-        processes inputs
+        Просчитывает инпуты
         """
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -58,15 +61,21 @@ class AsteroidsGame:
             self.ship.accelerate()
 
     def _model(self):
+        """
+        Просчитывает мо
+        """
         self._calc_collisions()
         self._move_objects()
         self.ship.decrease_velocity()
 
         if not self.asteroids:
             self.level += 1
-            self.create_asteroids()
+            self.create_asteroids(self.level)
 
     def _view(self):
+        """
+        Отображает всё
+        """
         self.screen.fill('black')
         if self.run:
             for obj in self._get_game_objects():
@@ -78,7 +87,9 @@ class AsteroidsGame:
         pygame.display.flip()
 
     def _calc_collisions(self):
-
+        """
+        Считает коллизии всех игровых объектов
+        """
         for asteroid in self.asteroids:
             if asteroid.collides_with(self.ship):
                 self.run = False
@@ -99,24 +110,38 @@ class AsteroidsGame:
             self.bullets.pop(0)
 
     def _move_objects(self):
+        """
+        Двигает все объекты на поле
+        """
         for _ in self._get_game_objects():
             _.move()
 
-    def _get_game_objects(self):
+    def _get_game_objects(self) -> list[GameObject]:
+        """
+        :return: Список всех игровых объектов,
+            как список GameObject объектов
+        """
         game_objects = [*self.asteroids, *self.bullets, self.ship]
         return game_objects
 
     def init_game_objects(self):
+        """
+        Инициализация начального состояния игры
+        """
         self.asteroids = []
         self.bullets = []
         self.ship = Ship(self.bullets.append)
         self.score = 0
         self.run = True
         self.level = 1
-        self.create_asteroids()
+        self.create_asteroids(self.level)
 
-    def create_asteroids(self):
-        for _ in range(2 + self.level):
+    def create_asteroids(self, level):
+        """
+        Добавляет некоторое количество астероидов в зависимости от уровня
+        :param level: уровень
+        """
+        for _ in range(2 + level):
             while True:
                 position = get_random_position()
                 if (
@@ -128,6 +153,9 @@ class AsteroidsGame:
                                            self.asteroids.append))
 
     def game_over_screen(self):
+        """
+        Рисует экран окончания игры
+        """
         font = pygame.font.SysFont('couriernew', 60)
         lost = font.render('YOU LOST', True, 'white')
         lost_rect = lost.get_rect(center=(WIDTH / 2, HEIGHT / 2))
@@ -143,6 +171,9 @@ class AsteroidsGame:
         self.screen.blit(space, space_rect)
 
     def print_score(self):
+        """
+        Рисует счет игрок в левом верхнем углу
+        """
         font = pygame.font.SysFont('couriernew', 40)
         score = font.render(str(self.score), True, 'white')
         self.screen.blit(score, (0, 0))
