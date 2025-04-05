@@ -68,6 +68,9 @@ class Ship(GameObject):
     """
     Класс корабля
     """
+    ship_stay = load_sprite("ship_stay")
+    ship_move = load_sprite("ship_move")
+    nothing = load_sprite("nothing")
 
     def __init__(self, add_bullet):
         """
@@ -97,7 +100,7 @@ class Ship(GameObject):
         """
         self.velocity = SHIP_MAX_VELOCITY
         self.last_direction.update(self.direction)
-        self.sprite = load_sprite("ship_move")
+        self.sprite = self.ship_move
 
     def shoot(self):
         """
@@ -124,7 +127,8 @@ class Ship(GameObject):
         ship = pygame.transform.rotate(self.sprite, angle + 90)
         ship_rect = ship.get_rect(center=self.position)
         screen.blit(ship, ship_rect)
-        self.sprite = load_sprite("ship_stay")
+
+        self.sprite = self.ship_stay
 
     def move(self):
         """
@@ -132,6 +136,9 @@ class Ship(GameObject):
         """
         new_position = self.position + self.last_direction * self.velocity
         self.position = wrap_position(new_position)
+
+    def change_sprites(self):
+        self.sprite = self.nothing
 
 
 class Asteroid(GameObject):
@@ -202,7 +209,6 @@ class UFO(GameObject):
                                                  UFO_MAX_VELOCITY)
         super().__init__(velocity, direction, position, load_sprite('ufo'), UFO_RADIUS)
 
-
     def shoot_at(self, ship_position: Vector2):
         """
         Создает пулю в направлении корабля с некоторым разбросом
@@ -219,9 +225,8 @@ class UFO(GameObject):
         Изменяет скорость и направление
         """
         self.velocity, self.direction = get_random_vel_dir(UFO_MIN_VELOCITY,
-                                                 UFO_MAX_VELOCITY)
+                                                           UFO_MAX_VELOCITY)
 
 
 # booster
 # records
-# dop life

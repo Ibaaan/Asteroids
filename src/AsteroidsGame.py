@@ -43,7 +43,7 @@ class View:
             for obj in model.get_game_objects():
                 obj.draw(self.screen)
 
-            self.print_score(model.score)
+            self.print_statistics(model.score, model.lives)
         else:
             self.game_over_screen(model.score)
         pygame.display.flip()
@@ -66,10 +66,15 @@ class View:
         space_rect = space.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 180))
         self.screen.blit(space, space_rect)
 
-    def print_score(self, score):
+    def print_statistics(self, score, lives):
         """
         Рисует счет игрок в левом верхнем углу
         """
         font = pygame.font.SysFont('couriernew', 40)
         score = font.render(str(score), True, 'white')
         self.screen.blit(score, (0, 0))
+
+        lives = font.render("Lives:" + str(lives), True, 'white')
+        self.screen.blit(lives, (0, score.get_height()))
+
+

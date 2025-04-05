@@ -6,13 +6,14 @@ from resources.settings import (COUNTER_CLOCKWISE,
                                 UFO_SHOOT_EVENT,
                                 SCORE,
                                 MIN_ASTEROID_DISTANCE,
-                                BIG, UFO_SCORE)
-from resources.utils import get_random_position
+                                BIG, UFO_SCORE, SHIP_RECOVERY)
+from resources.utils import get_random_position, load_sprite
 from src.GameObjects import GameObject, Asteroid, Ship, UFO
 
 
 class Model:
     def __init__(self):
+        self.lives = 5
         self.ufos = []
         self.asteroids = []
         self.ship_bullets = []
@@ -50,6 +51,9 @@ class Model:
                 for ufo in self.ufos:
                     ufo.shoot_at(self.ship.position)
                     ufo.change_velocity()
+            elif e.type == SHIP_RECOVERY:
+                self.ship.change_sprites()
+
 
         is_key_pressed = pygame.key.get_pressed()
         if is_key_pressed[pygame.K_d]:
@@ -77,7 +81,11 @@ class Model:
         """
         for object in [*self.asteroids, *self.ufo_bullets, *self.ufos]:
             if object.collides_with(self.ship):
-                self.run = False
+                self.lives -= 1
+                self.ship.position = self.new_ship_pos()
+                set_timer(SHIP_RECOVERY, 90, 10)
+                if self.lives == 0:
+                    self.run = False
 
 
         for bullet in self.ship_bullets:
@@ -165,3 +173,12 @@ class Model:
         self.score = 0
         self.run = True
         self.level = 1
+        self.lives = 5
+
+    def new_ship_pos(self):
+        while True:
+            pos = get_random_position()
+            for object in [*self.asteroids,*self.ufos, *self.ufo_bullets]:
+                if pos.distance_to(object.position) < 100:
+                    continue
+            return pos
