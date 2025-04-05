@@ -1,4 +1,6 @@
 # размеры экрана
+import pygame
+
 HEIGHT = 600
 WIDTH = 800
 
@@ -21,12 +23,22 @@ ASTEROID_SCALES = {BIG: 1.0,
 ASTEROID_RADII = {BIG: 35,
                   MEDIUM: 35 / 2,
                   SMALL: 35 / 1.5}
-ASTEROIDS_SCORE = {BIG: 20,
-                   MEDIUM: 50,
-                   SMALL: 100}
+
 MAX_ASTEROID_VELOCITY, MIN_ASTEROID_VELOCITY = 3, 1
 # Радиус относительно корабля в котором не могут заспавнится астероиды
 MIN_ASTEROID_DISTANCE = 400
 
 # константы для пуль
 BULLET_SPEED = 5
+
+# константы для нло
+UFO_SCORE = 4
+UFO_RADIUS = 16
+UFO_MIN_VELOCITY = 1
+UFO_MAX_VELOCITY = 2
+UFO_SHOOT_EVENT = pygame.USEREVENT + 1
+
+SCORE = {BIG: 20,
+         MEDIUM: 50,
+         SMALL: 100,
+         UFO_SCORE: 120}

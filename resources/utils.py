@@ -1,3 +1,4 @@
+import math
 import os
 import random
 
@@ -59,3 +60,12 @@ def get_random_position():
     :return: Случайную координату на игровом поле
     """
     return Vector2(random.randint(0, WIDTH), random.randint(0, HEIGHT))
+
+def randomize_vector_direction(vector:Vector2):
+    """
+    :return: единичный вектор отличающийся от данного
+        максимум на 15 градусов
+    """
+    vector.normalize_ip()
+    angle_to_rotate = random.randint(-15, 15)
+    return vector.rotate(angle_to_rotate)

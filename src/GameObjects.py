@@ -8,11 +8,12 @@ from resources.settings import (WIDTH,
                                 BULLET_SPEED,
                                 SHIP_DECELERATION_FACTOR,
                                 SHIP_MIN_VELOCITY, ASTEROID_RADII,
-                                MIN_ASTEROID_VELOCITY, MAX_ASTEROID_VELOCITY)
+                                MIN_ASTEROID_VELOCITY, MAX_ASTEROID_VELOCITY, UFO_RADIUS, UFO_MIN_VELOCITY,
+                                UFO_MAX_VELOCITY)
 from resources.utils import (wrap_position,
                              get_random_vel_dir,
                              load_sprite,
-                             sprite_for_asteroid)
+                             sprite_for_asteroid, randomize_vector_direction)
 
 
 class GameObject:
@@ -189,7 +190,38 @@ class Bullet(GameObject):
         """
         self.position = self.position + self.direction * self.velocity
 
+
+class UFO(GameObject):
+    """
+    Класс нло, штука стреляет в игрока
+    """
+
+    def __init__(self, position, add_bullets):
+        self.add_bullets = add_bullets
+        velocity, direction = get_random_vel_dir(UFO_MIN_VELOCITY,
+                                                 UFO_MAX_VELOCITY)
+        super().__init__(velocity, direction, position, load_sprite('ufo'), UFO_RADIUS)
+
+
+    def shoot_at(self, ship_position: Vector2):
+        """
+        Создает пулю в направлении корабля с некоторым разбросом
+        :param ship_position: координаты корабля
+        :return:
+        """
+        vector_to_ship = ship_position - self.position
+        new_bullet = Bullet(self.position, BULLET_SPEED / 2,
+                            randomize_vector_direction(vector_to_ship))
+        self.add_bullets(new_bullet)
+
+    def change_velocity(self):
+        """
+        Изменяет скорость и направление
+        """
+        self.velocity, self.direction = get_random_vel_dir(UFO_MIN_VELOCITY,
+                                                 UFO_MAX_VELOCITY)
+
+
 # booster
 # records
 # dop life
-# nlo
