@@ -6,13 +6,14 @@ from resources.settings import (COUNTER_CLOCKWISE,
                                 UFO_SHOOT_EVENT,
                                 SCORE,
                                 MIN_ASTEROID_DISTANCE,
-                                BIG, UFO_SCORE, SHIP_RECOVERY)
-from resources.utils import get_random_position, load_sprite
-from src.GameObjects import GameObject, Asteroid, Ship, UFO
+                                BIG, UFO_SCORE, SHIP_RECOVERY, BOOSTER_PICKUP, BULLET_SPEED)
+from resources.utils import get_random_position
+from src.GameObjects import GameObject, Asteroid, Ship, UFO, Booster
 
 
 class Model:
     def __init__(self):
+        self.bullet_speed = BULLET_SPEED
         self.lives = 5
         self.ufos = []
         self.asteroids = []
@@ -22,10 +23,10 @@ class Model:
         self.score = 0
         self.run = True
         self.level = 1
+        self.boosters = []
         self._init_game_objects()
 
         set_timer(UFO_SHOOT_EVENT, 1500)
-
 
     def tick(self):
         self._controller()
@@ -41,7 +42,7 @@ class Model:
                 pygame.quit()
             elif e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_SPACE:
-                    self.ship.shoot()
+                    self.ship.shoot(self.bullet_speed)
                 if e.key == pygame.K_r:
                     self._reset_variables()
                     self._init_game_objects()
@@ -53,7 +54,9 @@ class Model:
                     ufo.change_velocity()
             elif e.type == SHIP_RECOVERY:
                 self.ship.change_sprites()
-
+            elif e.type == BOOSTER_PICKUP:
+                self.bullet_speed = BULLET_SPEED
+                print(1)
 
         is_key_pressed = pygame.key.get_pressed()
         if is_key_pressed[pygame.K_d]:
@@ -87,7 +90,6 @@ class Model:
                 if self.lives == 0:
                     self.run = False
 
-
         for bullet in self.ship_bullets:
             for asteroid in self.asteroids:
                 if asteroid.collides_with(bullet):
@@ -110,6 +112,12 @@ class Model:
                     except ValueError as e:
                         print(e)
 
+        for booster in self.boosters:
+            if self.ship.collides_with(booster):
+                self.bullet_speed *= 3
+                set_timer(BOOSTER_PICKUP, 10000, 1)
+                self.boosters.remove(booster)
+
         if len(self.ship_bullets) > 4:
             self.ship_bullets.pop(0)
 
@@ -126,7 +134,7 @@ class Model:
             как список GameObject объектов
         """
         game_objects = [*self.asteroids, *self.ship_bullets, self.ship,
-                        *self.ufos, *self.ufo_bullets]
+                        *self.ufos, *self.ufo_bullets, *self.boosters]
         return game_objects
 
     def _init_game_objects(self):
@@ -135,6 +143,7 @@ class Model:
         """
         self._create_asteroids(self.level)
         self._create_ufos(self.level)
+        self.boosters.append(Booster(get_random_position()))
 
     def _create_asteroids(self, level):
         """
@@ -174,11 +183,12 @@ class Model:
         self.run = True
         self.level = 1
         self.lives = 5
+        self.boosters = []
 
     def new_ship_pos(self):
         while True:
             pos = get_random_position()
-            for object in [*self.asteroids,*self.ufos, *self.ufo_bullets]:
+            for object in [*self.asteroids, *self.ufos, *self.ufo_bullets]:
                 if pos.distance_to(object.position) < 100:
                     continue
             return pos

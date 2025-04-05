@@ -5,11 +5,10 @@ from resources.settings import (WIDTH,
                                 HEIGHT,
                                 SHIP_ANGULAR_VELOCITY,
                                 SHIP_MAX_VELOCITY,
-                                BULLET_SPEED,
                                 SHIP_DECELERATION_FACTOR,
                                 SHIP_MIN_VELOCITY, ASTEROID_RADII,
                                 MIN_ASTEROID_VELOCITY, MAX_ASTEROID_VELOCITY, UFO_RADIUS, UFO_MIN_VELOCITY,
-                                UFO_MAX_VELOCITY)
+                                UFO_MAX_VELOCITY, UFO_BULLET_SPEED)
 from resources.utils import (wrap_position,
                              get_random_vel_dir,
                              load_sprite,
@@ -102,11 +101,11 @@ class Ship(GameObject):
         self.last_direction.update(self.direction)
         self.sprite = self.ship_move
 
-    def shoot(self):
+    def shoot(self, speed):
         """
         Корабль стреляет в перед собой
         """
-        bullet = Bullet(self.position, BULLET_SPEED, self.direction)
+        bullet = Bullet(self.position, speed, self.direction)
         self.add_bullet(bullet)
 
     def decrease_velocity(self):
@@ -216,7 +215,7 @@ class UFO(GameObject):
         :return:
         """
         vector_to_ship = ship_position - self.position
-        new_bullet = Bullet(self.position, BULLET_SPEED / 2,
+        new_bullet = Bullet(self.position, UFO_BULLET_SPEED,
                             randomize_vector_direction(vector_to_ship))
         self.add_bullets(new_bullet)
 
@@ -228,5 +227,12 @@ class UFO(GameObject):
                                                            UFO_MAX_VELOCITY)
 
 
-# booster
-# records
+class Booster(GameObject):
+    def __init__(self, position):
+        surface = pygame.Surface((2 * 9, 2 * 9), pygame.SRCALPHA)
+        super().__init__(0, Vector2(0, 0), position,
+                         surface, 9)
+        pygame.draw.circle(surface, 'green', (9, 9), 9)
+
+    def draw(self, screen):
+        screen.blit(self.sprite, self.position)

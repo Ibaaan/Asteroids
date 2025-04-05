@@ -1,4 +1,3 @@
-import math
 import os
 import random
 
@@ -61,7 +60,8 @@ def get_random_position():
     """
     return Vector2(random.randint(0, WIDTH), random.randint(0, HEIGHT))
 
-def randomize_vector_direction(vector:Vector2):
+
+def randomize_vector_direction(vector: Vector2):
     """
     :return: единичный вектор отличающийся от данного
         максимум на 15 градусов

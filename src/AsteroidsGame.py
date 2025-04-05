@@ -28,6 +28,7 @@ class View:
     """
     Класс изображающий объекты на экране
     """
+
     def __init__(self):
         pygame.init()
 
@@ -76,5 +77,3 @@ class View:
 
         lives = font.render("Lives:" + str(lives), True, 'white')
         self.screen.blit(lives, (0, score.get_height()))
-
-
