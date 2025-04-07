@@ -1,7 +1,8 @@
 import pygame
 
-from resources.settings import (HEIGHT, WIDTH)
+from resources.settings import (HEIGHT, WIDTH, ENTER_NAME, SHOW_TABLE)
 from src.Model import Model
+from src.Results import Results
 
 
 class AsteroidsGame:
@@ -20,7 +21,7 @@ class AsteroidsGame:
         """
         while True:
             self.model.update()
-            self.view.view(self.model)
+            self.view.draw(self.model)
             self.clock.tick(60)
 
 
@@ -31,11 +32,10 @@ class View:
 
     def __init__(self):
         pygame.init()
-
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Asteroids")
 
-    def view(self, model):
+    def draw(self, model):
         """
         Отображает всё
         """
@@ -45,6 +45,11 @@ class View:
                 obj.draw(self.screen)
 
             self.print_statistics(model.score, model.lives)
+        elif model.saving_results:
+            if model.saving_results == ENTER_NAME:
+                model.results.draw_enter_name(self.screen)
+            elif model.saving_results == SHOW_TABLE:
+                model.results.draw_table(self.screen)
         else:
             self.game_over_screen(model.score)
         pygame.display.flip()
@@ -67,6 +72,10 @@ class View:
         space_rect = space.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 180))
         self.screen.blit(space, space_rect)
 
+        results = font.render('P to results', True, 'white')
+        results_rect = space.get_rect(center=(WIDTH / 2, score.get_height()))
+        self.screen.blit(results, results_rect)
+
     def print_statistics(self, score, lives):
         """
         Рисует счет игрок в левом верхнем углу
@@ -77,3 +86,4 @@ class View:
 
         lives = font.render("Lives:" + str(lives), True, 'white')
         self.screen.blit(lives, (0, score.get_height()))
+

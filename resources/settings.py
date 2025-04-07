@@ -45,3 +45,7 @@ SCORE = {BIG: 20,
          MEDIUM: 50,
          SMALL: 100,
          UFO_SCORE: 120}
+
+EXIT_TABLE = 0
+ENTER_NAME = 1
+SHOW_TABLE = 2
