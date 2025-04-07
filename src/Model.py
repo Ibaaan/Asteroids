@@ -12,6 +12,9 @@ from src.GameObjects import GameObject, Asteroid, Ship, UFO, Booster
 
 
 class Model:
+    """
+    Модель со всей логикой игры
+    """
     def __init__(self):
         self.bullet_speed = BULLET_SPEED
         self.lives = 5
@@ -28,7 +31,10 @@ class Model:
 
         set_timer(UFO_SHOOT_EVENT, 1500)
 
-    def tick(self):
+    def update(self):
+        """
+        Обновляет модель
+        """
         self._controller()
         if self.run:
             self._model()
@@ -162,6 +168,10 @@ class Model:
                                            self.asteroids.append))
 
     def _create_ufos(self, level):
+        """
+        Создает несколько нло
+        :param level: То сколько нло будет создано
+        """
         for i in range(level):
             while True:
                 position = get_random_position()
@@ -174,6 +184,9 @@ class Model:
             self.ufos.append(new_ufo)
 
     def _reset_variables(self):
+        """
+        Возвращает все переменные в исходное состояние
+        """
         self.ufos = []
         self.asteroids = []
         self.ship_bullets = []
@@ -186,6 +199,10 @@ class Model:
         self.boosters = []
 
     def new_ship_pos(self):
+        """
+        Новая позиция корабля после столкновения
+        :return:
+        """
         while True:
             pos = get_random_position()
             for object in [*self.asteroids, *self.ufos, *self.ufo_bullets]:

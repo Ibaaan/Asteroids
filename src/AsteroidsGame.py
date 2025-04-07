@@ -19,7 +19,7 @@ class AsteroidsGame:
         main loop
         """
         while True:
-            self.model.tick()
+            self.model.update()
             self.view.view(self.model)
             self.clock.tick(60)
 

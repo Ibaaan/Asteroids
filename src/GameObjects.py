@@ -228,6 +228,9 @@ class UFO(GameObject):
 
 
 class Booster(GameObject):
+    """
+    Класс бустера увеличивающего скорость полета пуль корабля
+    """
     def __init__(self, position):
         surface = pygame.Surface((2 * 9, 2 * 9), pygame.SRCALPHA)
         super().__init__(0, Vector2(0, 0), position,
