@@ -72,7 +72,7 @@ class Model:
                     ufo.shoot_at(self.ship.position)
                     ufo.change_velocity()
             elif event.type == SHIP_RECOVERY:
-                self.ship.change_sprites()
+                self.ship.after_death_animation()
             elif event.type == BOOSTER_PICKUP:
                 self.bullet_speed = BULLET_SPEED
 
@@ -100,8 +100,8 @@ class Model:
         """
         Считает коллизии всех игровых объектов
         """
-        for object in [*self.asteroids, *self.ufo_bullets, *self.ufos]:
-            if object.collides_with(self.ship):
+        for game_object in [*self.asteroids, *self.ufo_bullets, *self.ufos]:
+            if game_object.collides_with(self.ship):
                 self.lives -= 1
                 self.ship.position = self.new_ship_pos()
                 set_timer(SHIP_RECOVERY, 90, 10)
@@ -220,3 +220,4 @@ class Model:
                 if pos.distance_to(object.position) < 100:
                     continue
             return pos
+

@@ -67,9 +67,9 @@ class Ship(GameObject):
     """
     Класс корабля
     """
-    ship_stay = load_sprite("ship_stay")
-    ship_move = load_sprite("ship_move")
-    nothing = load_sprite("nothing")
+    ship_stay_sprite = load_sprite("ship_stay")
+    ship_move_sprite = load_sprite("ship_move")
+    nothing_sprite = load_sprite("nothing")
 
     def __init__(self, add_bullet):
         """
@@ -79,9 +79,11 @@ class Ship(GameObject):
         # last_direction - направление инерции корабля
         self.last_direction = Vector2()
         self.add_bullet = add_bullet
+        self.afterdeath_sprite_flag = False
+        self.ship_move_flag = False
         super().__init__(0, Vector2(0, -1),
                          Vector2(WIDTH / 2, HEIGHT / 2),
-                         load_sprite("ship_stay"),
+                         self.ship_stay_sprite,
                          10)
 
     def rotate(self, clockwise):
@@ -99,7 +101,7 @@ class Ship(GameObject):
         """
         self.velocity = SHIP_MAX_VELOCITY
         self.last_direction.update(self.direction)
-        self.sprite = self.ship_move
+        self.ship_move_flag = True
 
     def shoot(self, speed):
         """
@@ -127,7 +129,7 @@ class Ship(GameObject):
         ship_rect = ship.get_rect(center=self.position)
         screen.blit(ship, ship_rect)
 
-        self.sprite = self.ship_stay
+        self._change_sprite()
 
     def move(self):
         """
@@ -136,8 +138,25 @@ class Ship(GameObject):
         new_position = self.position + self.last_direction * self.velocity
         self.position = wrap_position(new_position)
 
-    def change_sprites(self):
-        self.sprite = self.nothing
+    def after_death_animation(self):
+        self.afterdeath_sprite_flag = True
+
+    def _change_sprite(self):
+        """
+        Меняет спрайт для анимаций и при смерти
+        """
+        if self.afterdeath_sprite_flag and self.sprite != self.nothing_sprite:
+            self.afterdeath_sprite_flag = False
+            self.sprite = self.nothing_sprite
+            return
+
+        if self.ship_move_flag and self.sprite != self.ship_move_sprite:
+            self.ship_move_flag = False
+            self.sprite = self.ship_move_sprite
+            return
+
+        if self.sprite != self.ship_stay_sprite:
+            self.sprite = self.ship_stay_sprite
 
 
 class Asteroid(GameObject):
