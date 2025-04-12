@@ -8,7 +8,7 @@ from resources.settings import (WIDTH,
                                 ACCELERATION_FACTOR,
                                 SHIP_MIN_VELOCITY, ASTEROID_RADII,
                                 MIN_ASTEROID_VELOCITY, MAX_ASTEROID_VELOCITY, UFO_RADIUS, UFO_MIN_VELOCITY,
-                                UFO_MAX_VELOCITY, UFO_BULLET_SPEED)
+                                UFO_MAX_VELOCITY, UFO_BULLET_SPEED, BULLET_SPEED)
 from resources.utils import (wrap_position,
                              get_random_velocity,
                              load_sprite,
@@ -68,7 +68,7 @@ class Ship(GameObject):
     ship_stay_sprite = load_sprite("ship_stay")
     ship_move_sprite = load_sprite("ship_move")
     nothing_sprite = load_sprite("nothing")
-
+    bullet_speed = BULLET_SPEED
     def __init__(self, add_bullet):
         """
         Конструктор корабля
@@ -100,11 +100,11 @@ class Ship(GameObject):
         self.velocity += SHIP_MAX_VELOCITY * self.direction
         self.ship_move_flag = True
 
-    def shoot(self, speed):
+    def shoot(self):
         """
         Корабль стреляет в перед собой
         """
-        bullet = Bullet(self.position, speed, self.direction)
+        bullet = Bullet(self.position, self.bullet_speed, self.direction)
         self.add_bullet(bullet)
 
     def draw(self, screen):
@@ -132,7 +132,6 @@ class Ship(GameObject):
     def after_death_animation(self):
         """
         Проигрывают анимацию при потере жизни
-        :return:
         """
         self.afterdeath_sprite_flag = True
 
@@ -153,6 +152,15 @@ class Ship(GameObject):
         if self.sprite != self.ship_stay_sprite:
             self.sprite = self.ship_stay_sprite
 
+    def change_bullet_speed(self, is_boost):
+        """
+        Изменения пули
+        """
+        if is_boost:
+            self.bullet_speed = BULLET_SPEED * 3
+        else:
+            self.bullet_speed = BULLET_SPEED
+        
 
 class Asteroid(GameObject):
     """

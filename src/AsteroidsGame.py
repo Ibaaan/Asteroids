@@ -1,10 +1,10 @@
 import pygame
 
 from resources.settings import (HEIGHT, WIDTH, ENTER_NAME, SHOW_TABLE)
-from src.Model import Model
+from src.Model import Model, Controller
 from src.Results import Results
 
-
+# TODO Отделить меню от логики
 class AsteroidsGame:
     """
     Класс со всей общей логикой
@@ -13,6 +13,7 @@ class AsteroidsGame:
     def __init__(self):
         self.view = View()
         self.model = Model()
+        self.controller = Controller(self.model)
         self.clock = pygame.time.Clock()
 
     def loop(self):
@@ -20,6 +21,7 @@ class AsteroidsGame:
         main loop
         """
         while True:
+            self.controller.process_events()
             self.model.update()
             self.view.draw(self.model)
             self.clock.tick(60)
