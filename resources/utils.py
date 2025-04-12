@@ -17,16 +17,15 @@ def wrap_position(old_position: Vector2):
     return Vector2(old_position.x % WIDTH, old_position.y % HEIGHT)
 
 
-def get_random_vel_dir(min_speed, max_speed):
+def get_random_velocity(min_speed, max_speed):
     """
     :param min_speed: минимальная скорость
     :param max_speed:  максимальная скорость
-    :return: Случайную величину скорости от min_speed до max_speed
-        с шагом 0.1; единичный вектор скорости
+    :return: Вектор со случайным углом и величиной в пределах (min_speed, max_speed)
     """
     speed = random.randint(min_speed * 10, max_speed * 10) / 10
     angle = random.randrange(0, 360)
-    return speed, Vector2(1, 0).rotate(angle)
+    return speed * Vector2(1, 0).rotate(angle)
 
 
 def load_sprite(name):

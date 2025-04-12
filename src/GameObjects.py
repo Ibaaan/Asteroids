@@ -5,12 +5,12 @@ from resources.settings import (WIDTH,
                                 HEIGHT,
                                 SHIP_ANGULAR_VELOCITY,
                                 SHIP_MAX_VELOCITY,
-                                SHIP_DECELERATION_FACTOR,
+                                ACCELERATION_FACTOR,
                                 SHIP_MIN_VELOCITY, ASTEROID_RADII,
                                 MIN_ASTEROID_VELOCITY, MAX_ASTEROID_VELOCITY, UFO_RADIUS, UFO_MIN_VELOCITY,
                                 UFO_MAX_VELOCITY, UFO_BULLET_SPEED)
 from resources.utils import (wrap_position,
-                             get_random_vel_dir,
+                             get_random_velocity,
                              load_sprite,
                              sprite_for_asteroid, randomize_vector_direction)
 
@@ -20,19 +20,17 @@ class GameObject:
     Общий предок для всех объектов в игре
     """
 
-    def __init__(self, velocity: float, direction: Vector2,
+    def __init__(self, velocity: Vector2,
                  position: Vector2, sprite, radius):
         """
         Конструктор игрового объект
         :param velocity: Скорость игрового объект
-        :param direction: Направление игрового объект
         :param position: Координаты игрового объект
         :param sprite: Спрайт для отрисовки игрового объект
         :param radius: Радиус окружности,
             представляющей хит бокс игрового объект
         """
         self.position = position
-        self.direction = direction
         self.velocity = velocity
         self.sprite = sprite
         self.radius = radius
@@ -41,7 +39,7 @@ class GameObject:
         """
         Перемещает игровой объект
         """
-        new_position = self.position + self.direction * self.velocity
+        new_position = self.position + self.velocity
         self.position = wrap_position(new_position)
 
     def draw(self, screen):
@@ -77,14 +75,14 @@ class Ship(GameObject):
         :param add_bullet: callback на добавление пуль
         """
         # last_direction - направление инерции корабля
-        self.last_direction = Vector2()
+        self.direction = Vector2(0, -1)
         self.add_bullet = add_bullet
         self.afterdeath_sprite_flag = False
         self.ship_move_flag = False
-        super().__init__(0, Vector2(0, -1),
-                         Vector2(WIDTH / 2, HEIGHT / 2),
-                         self.ship_stay_sprite,
-                         10)
+        super().__init__(velocity=Vector2(0, 0),
+                         position=Vector2(WIDTH / 2, HEIGHT / 2),
+                         sprite=self.ship_stay_sprite,
+                         radius=10)
 
     def rotate(self, clockwise):
         """
@@ -99,8 +97,7 @@ class Ship(GameObject):
         """
         Ускоряет корабль до максимальной скорости
         """
-        self.velocity = SHIP_MAX_VELOCITY
-        self.last_direction.update(self.direction)
+        self.velocity += SHIP_MAX_VELOCITY * self.direction
         self.ship_move_flag = True
 
     def shoot(self, speed):
@@ -109,15 +106,6 @@ class Ship(GameObject):
         """
         bullet = Bullet(self.position, speed, self.direction)
         self.add_bullet(bullet)
-
-    def decrease_velocity(self):
-        """
-        Замедляет корабль
-        """
-        if self.velocity - SHIP_MIN_VELOCITY > 0:
-            self.velocity -= self.velocity / SHIP_DECELERATION_FACTOR
-        else:
-            self.velocity = 0
 
     def draw(self, screen):
         """
@@ -135,15 +123,22 @@ class Ship(GameObject):
         """
         Перемещает корабль
         """
-        new_position = self.position + self.last_direction * self.velocity
+        new_position = self.position + self.velocity
         self.position = wrap_position(new_position)
+        self.velocity *= ACCELERATION_FACTOR
+        if self.velocity.length() - SHIP_MIN_VELOCITY < 0:
+            self.velocity = Vector2(0, 0)
 
     def after_death_animation(self):
+        """
+        Проигрывают анимацию при потере жизни
+        :return:
+        """
         self.afterdeath_sprite_flag = True
 
     def _change_sprite(self):
         """
-        Меняет спрайт для анимаций и при смерти
+        Меняет спрайт для анимации движения и при смерти
         """
         if self.afterdeath_sprite_flag and self.sprite != self.nothing_sprite:
             self.afterdeath_sprite_flag = False
@@ -174,11 +169,13 @@ class Asteroid(GameObject):
         """
         self.add_asteroid = add_asteroid
         self.size_name = size_name
-        velocity, direction = get_random_vel_dir(MIN_ASTEROID_VELOCITY,
-                                                 MAX_ASTEROID_VELOCITY)
-        super().__init__(velocity, direction, position,
-                         sprite_for_asteroid(size_name),
-                         ASTEROID_RADII.get(size_name))
+        velocity = get_random_velocity(MIN_ASTEROID_VELOCITY,
+                                       MAX_ASTEROID_VELOCITY)
+
+        super().__init__(velocity=velocity,
+                         position=position,
+                         sprite=sprite_for_asteroid(size_name),
+                         radius=ASTEROID_RADII.get(size_name))
 
     def split(self):
         """
@@ -197,23 +194,23 @@ class Bullet(GameObject):
     Класс пули
     """
 
-    def __init__(self, position, velocity, direction):
+    def __init__(self, position, speed, direction):
         """
         Конструктор
         :param position: Первоначальная позиция пули
-        :param velocity: Скорость пули
+        :param speed: Скорость пули
         :param direction: Направление движения пули
         """
-        new_direction = Vector2(0, 0)
-        new_direction.update(direction)
-        super().__init__(velocity, new_direction,
-                         position, load_sprite('bullet'), 3)
+        super().__init__(velocity=speed * direction.copy(),
+                         position=position,
+                         sprite=load_sprite('bullet'),
+                         radius=3)
 
     def move(self):
         """
         Перемещает пулю
         """
-        self.position = self.position + self.direction * self.velocity
+        self.position = self.position + self.velocity
 
 
 class UFO(GameObject):
@@ -223,9 +220,12 @@ class UFO(GameObject):
 
     def __init__(self, position, add_bullets):
         self.add_bullets = add_bullets
-        velocity, direction = get_random_vel_dir(UFO_MIN_VELOCITY,
-                                                 UFO_MAX_VELOCITY)
-        super().__init__(velocity, direction, position, load_sprite('ufo'), UFO_RADIUS)
+        velocity = get_random_velocity(UFO_MIN_VELOCITY,
+                                       UFO_MAX_VELOCITY)
+        super().__init__(velocity=velocity,
+                         position=position,
+                         sprite=load_sprite('ufo'),
+                         radius=UFO_RADIUS)
 
     def shoot_at(self, ship_position: Vector2):
         """
@@ -242,18 +242,22 @@ class UFO(GameObject):
         """
         Изменяет скорость и направление
         """
-        self.velocity, self.direction = get_random_vel_dir(UFO_MIN_VELOCITY,
-                                                           UFO_MAX_VELOCITY)
+        self.velocity = get_random_velocity(UFO_MIN_VELOCITY,
+                                            UFO_MAX_VELOCITY)
 
 
 class Booster(GameObject):
     """
     Класс бустера увеличивающего скорость полета пуль корабля
     """
+
     def __init__(self, position):
+        # Зеленый круг радиуса 9
         surface = pygame.Surface((2 * 9, 2 * 9), pygame.SRCALPHA)
-        super().__init__(0, Vector2(0, 0), position,
-                         surface, 9)
+        super().__init__(velocity=Vector2(0, 0),
+                         position=position,
+                         sprite=surface,
+                         radius=9)
         pygame.draw.circle(surface, 'green', (9, 9), 9)
 
     def draw(self, screen):

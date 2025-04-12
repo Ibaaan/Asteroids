@@ -5,14 +5,14 @@ HEIGHT = 600
 WIDTH = 800
 
 # константы для корабля
-SHIP_MAX_VELOCITY = 2.7
+SHIP_MAX_VELOCITY = 0.2
 SHIP_ANGULAR_VELOCITY = 4
 CLOCKWISE = True
 COUNTER_CLOCKWISE = False
 # коэффициент замедления корабля
-SHIP_DECELERATION_FACTOR = 150
+ACCELERATION_FACTOR = 0.99
 # скорость настолько маленькая, что считающуюся 0
-SHIP_MIN_VELOCITY = 0.1
+SHIP_MIN_VELOCITY = 0.01
 
 # константы для астероидов
 # размерности астероидов

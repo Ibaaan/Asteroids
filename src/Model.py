@@ -33,6 +33,7 @@ class Model:
         self.level = 1
         self.boosters = []
         self._init_game_objects()
+
         self.results = Results()
         self.saving_results = EXIT_TABLE
         set_timer(UFO_SHOOT_EVENT, 1500)
@@ -44,7 +45,7 @@ class Model:
         self._controller()
         if self.run:
             self._model()
-
+    # TODO упростить для понимания контроллер
     def _controller(self):
         """
         Просчитывает инпуты
@@ -75,7 +76,7 @@ class Model:
                 self.ship.after_death_animation()
             elif event.type == BOOSTER_PICKUP:
                 self.bullet_speed = BULLET_SPEED
-
+        # TODO исправить бред с ускорением полета пули
         is_key_pressed = pygame.key.get_pressed()
         if is_key_pressed[pygame.K_d]:
             self.ship.rotate(CLOCKWISE)
@@ -90,7 +91,6 @@ class Model:
         """
         self._calc_collisions()
         self._move_objects()
-        self.ship.decrease_velocity()
 
         if not self.asteroids:
             self.level += 1
