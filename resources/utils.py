@@ -4,7 +4,7 @@ import random
 from pygame.image import load
 from pygame.math import Vector2
 
-from resources.settings import WIDTH, HEIGHT
+from resources.settings import FIELD_WIDTH, FIELD_HEIGHT
 
 
 def wrap_position(old_position: Vector2):
@@ -14,7 +14,7 @@ def wrap_position(old_position: Vector2):
     :return: Новые координаты, такие что, если old_position находится вне
         игрового поля, то новые будут на противоположной стороне
     """
-    return Vector2(old_position.x % WIDTH, old_position.y % HEIGHT)
+    return Vector2(old_position.x % FIELD_WIDTH, old_position.y % FIELD_HEIGHT)
 
 
 def get_random_velocity(min_speed, max_speed):
@@ -57,7 +57,7 @@ def get_random_position():
     """
     :return: Случайную координату на игровом поле
     """
-    return Vector2(random.randint(0, WIDTH), random.randint(0, HEIGHT))
+    return Vector2(random.randint(0, FIELD_WIDTH), random.randint(0, FIELD_HEIGHT))
 
 
 def randomize_vector_direction(vector: Vector2):

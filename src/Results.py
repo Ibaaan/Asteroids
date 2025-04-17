@@ -1,8 +1,10 @@
 import json
 
 import pygame
+from pygame import Surface, SurfaceType
+from pygame_widgets.button import ButtonArray
 
-from resources.settings import WIDTH, HEIGHT, ENTER_NAME, SHOW_TABLE
+from resources.settings import FIELD_WIDTH, FIELD_HEIGHT
 
 
 class Results:
@@ -14,7 +16,7 @@ class Results:
 
     def __init__(self):
         self.font = pygame.font.Font(None, 36)
-        self.input_box = pygame.Rect((WIDTH - 200) // 2, (HEIGHT - 40) // 2, 200, 40)
+        self.input_box = pygame.Rect((FIELD_WIDTH - 200) // 2, (FIELD_HEIGHT - 40) // 2, 200, 40)
         self.input_text = ''
         self.input_active = True
 
@@ -55,10 +57,12 @@ class Results:
         for name, score in scores.items():
             score_text = f"{name}: {score}"
             text_surface = font.render(score_text, True, (255, 255, 255))
-            screen.blit(text_surface, ((WIDTH - 200) // 2, y_offset))
+            screen.blit(text_surface, ((FIELD_WIDTH - 200) // 2, y_offset))
             y_offset += 40
 
     def get_score(self, ):
         with open(self.filename, 'r') as json_file:
             data = json.load(json_file)
         return data
+
+

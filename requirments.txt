@@ -1,1 +1,2 @@
 pygama==2.6.1
+pygame-widgets=1.1.7

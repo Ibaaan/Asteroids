@@ -1,5 +1,3 @@
-import sys
-
 import pygame
 from pygame.time import set_timer
 
@@ -8,57 +6,52 @@ from resources.settings import (COUNTER_CLOCKWISE,
                                 UFO_UPDATE_EVENT,
                                 SCORE,
                                 MIN_ASTEROID_DISTANCE,
-                                BIG, UFO_SCORE, SHIP_RECOVERY, BOOSTER_ENDED, BULLET_SPEED, ENTER_NAME, EXIT_TABLE,
-                                SHOW_TABLE, ACCELERATE)
+                                BIG, UFO_SCORE, SHIP_RECOVERY_EVENT, BOOSTER_ENDED, ACCELERATE,
+                                GAME_OVER_EVENT, GAME_RUN_STATE)
 from resources.utils import get_random_position
 from src.GameObjects import GameObject, Asteroid, Ship, UFO, Booster
-from src.Results import Results
 
 
-class Model:
+class GameModel:
     """
     Модель со всей логикой игры
     """
 
+    lives: int
+    ufos:list
+    asteroids:list
+    ship_bullets:list
+    ufo_bullets:list
+    ship:Ship
+    score:int
+    level:int
+    boosters:list
+
     def __init__(self):
-
-        self.lives = 5
-        self.ufos = []
-        self.asteroids = []
-        self.ship_bullets = []
-        self.ufo_bullets = []
-        self.ship = Ship(self.ship_bullets.append)
-        self.score = 0
-        self.run = True
-        self.level = 1
-        self.boosters = []
-
+        self.reset_variables()
         self._init_game_objects()
-
-        self.results = Results()
-        self.saving_results = EXIT_TABLE
         set_timer(UFO_UPDATE_EVENT, 1500)
 
-    def _reset_variables(self):
+    def reset_variables(self):
         """
         Возвращает все переменные в исходное состояние
         """
-        self.lives = 5
+        self.lives = 0
         self.ufos = []
         self.asteroids = []
         self.ship_bullets = []
         self.ufo_bullets = []
         self.ship = Ship(self.ship_bullets.append)
         self.score = 0
-        self.run = True
         self.level = 1
         self.boosters = []
 
-    def update(self):
+    def update(self, game_state):
         """
-        Обновляет модель
+        Обновляет модель, если игра идет
+        :param game_state: Отвечает за то, идет ли игра
         """
-        if not self.run:
+        if game_state != GAME_RUN_STATE:
             return
 
         self._calc_collisions()
@@ -76,9 +69,9 @@ class Model:
             if game_object.collides_with(self.ship):
                 self.lives -= 1
                 self.ship.position = self.new_ship_pos()
-                set_timer(SHIP_RECOVERY, 90, 10)
-                if self.lives == 0:
-                    self.run = False
+                set_timer(SHIP_RECOVERY_EVENT, 90, 10)
+                if self.lives <= 0:
+                    pygame.event.post(GAME_OVER_EVENT)
 
         for bullet in self.ship_bullets:
             for asteroid in self.asteroids:
@@ -87,7 +80,7 @@ class Model:
                     self.asteroids.remove(asteroid)
                     try:
                         self.ship_bullets.remove(bullet)
-                    except ValueError as e:
+                    except ValueError:
                         pass
                     asteroid.split()
 
@@ -169,8 +162,6 @@ class Model:
     def ship_shoot(self):
         self.ship.shoot()
 
-
-
     def new_ship_pos(self):
         """
         Новая позиция корабля после столкновения
@@ -204,44 +195,3 @@ class Model:
             self.ship.rotate(False)
         elif action_id == ACCELERATE:
             self.ship.accelerate()
-
-
-class Controller:
-    def __init__(self, game_model:Model):
-        self.model = game_model
-
-    def process_events(self):
-        """
-        Обрабатывает входные события из очереди событий Pygame
-        """
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                # TODO Весь закоменченный код вынести в класс обработки Menu
-                # if self.saving_results == ENTER_NAME:
-                #     self.saving_results = self.results.handle_event(event, self.score)
-                # elif self.saving_results == SHOW_TABLE and event.key == pygame.K_SPACE:
-                #     self.saving_results = EXIT_TABLE
-                if event.key == pygame.K_SPACE:
-                    self.model.ship_shoot()
-                # if event.key == pygame.K_r:
-                #     self._reset_variables()
-                #     self._init_game_objects()
-                # if event.key == pygame.K_p and not self.run:
-                #     self.saving_results = ENTER_NAME
-            elif event.type == UFO_UPDATE_EVENT:
-                self.model.on_ufo_update()
-            elif event.type == SHIP_RECOVERY:
-                self.model.after_death_animation()
-            elif event.type == BOOSTER_ENDED:
-                self.model.booster_ended()
-
-        is_key_pressed = pygame.key.get_pressed()
-        if is_key_pressed[pygame.K_d]:
-            self.model.on_ship_input(CLOCKWISE)
-        if is_key_pressed[pygame.K_a]:
-            self.model.on_ship_input(COUNTER_CLOCKWISE)
-        if is_key_pressed[pygame.K_w]:
-            self.model.on_ship_input(ACCELERATE)

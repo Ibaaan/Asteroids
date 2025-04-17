@@ -1,8 +1,8 @@
 import pygame
 from pygame.math import Vector2
 
-from resources.settings import (WIDTH,
-                                HEIGHT,
+from resources.settings import (FIELD_WIDTH,
+                                FIELD_HEIGHT,
                                 SHIP_ANGULAR_VELOCITY,
                                 SHIP_MAX_VELOCITY,
                                 ACCELERATION_FACTOR,
@@ -80,7 +80,7 @@ class Ship(GameObject):
         self.afterdeath_sprite_flag = False
         self.ship_move_flag = False
         super().__init__(velocity=Vector2(0, 0),
-                         position=Vector2(WIDTH / 2, HEIGHT / 2),
+                         position=Vector2(FIELD_WIDTH / 2, FIELD_HEIGHT / 2),
                          sprite=self.ship_stay_sprite,
                          radius=10)
 
