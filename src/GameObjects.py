@@ -1,4 +1,5 @@
 import pygame
+from pygame import Surface, SurfaceType
 from pygame.math import Vector2
 
 from resources.settings import (FIELD_WIDTH,
@@ -15,25 +16,29 @@ from resources.utils import (wrap_position,
                              sprite_for_asteroid, randomize_vector_direction)
 
 
-class GameObject:
+class GameObject(pygame.sprite.Sprite):
     """
     Общий предок для всех объектов в игре
     """
 
     def __init__(self, velocity: Vector2,
-                 position: Vector2, sprite, radius):
+                 position: Vector2, image:Surface, name):
         """
         Конструктор игрового объект
         :param velocity: Скорость игрового объект
         :param position: Координаты игрового объект
-        :param sprite: Спрайт для отрисовки игрового объект
-        :param radius: Радиус окружности,
+        :param image: Спрайт для отрисовки игрового объект
+        :param name: Радиус окружности,
             представляющей хит бокс игрового объект
         """
+
+        pygame.sprite.Sprite.__init__(self)
         self.position = position
         self.velocity = velocity
-        self.sprite = sprite
-        self.radius = radius
+        self.image = image
+        self.name = name
+
+        self._update_mask()
 
     def move(self):
         """
@@ -42,38 +47,46 @@ class GameObject:
         new_position = self.position + self.velocity
         self.position = wrap_position(new_position)
 
-    def draw(self, screen):
+    def collides_with(self, game_object_group, doKill):
         """
-        Отрисовка игрового объекта на экране
-        :param screen: экран
-        """
-        blit_position = self.position - Vector2(self.radius)
-        screen.blit(self.sprite, blit_position)
-
-    def collides_with(self, game_object):
-        """
-        Проверяет колизится ли этот объект с данным
-        :param game_object: данный игровой объект
+        Проверяет колизится ли этот объект с данной группой
+        :param game_object_group: данной группой объектов
         :return: True - если хит боксы пересекаются,
             False - иначе
         """
-        distance = self.position.distance_to(game_object.position)
-        return distance < self.radius + game_object.radius
+        if len(game_object_group) == 0:
+            return list()
+        if pygame.sprite.spritecollide(self, game_object_group, False):
+                return pygame.sprite.spritecollide(self, game_object_group,  doKill,
+                                           pygame.sprite.collide_mask)
+        else:
+            return list()
 
+    def update(self, *args, **kwargs):
+        super().update(*args, **kwargs)
+        self._update_mask()
+
+    def _update_mask(self):
+        self.rect = self.image.get_rect()
+        self.rect.center = self.position
+        self.mask = pygame.mask.from_surface(self.image)
 
 class Ship(GameObject):
     """
     Класс корабля
     """
-    ship_stay_sprite = load_sprite("ship_stay")
-    ship_move_sprite = load_sprite("ship_move")
-    nothing_sprite = load_sprite("nothing")
+
     bullet_speed = BULLET_SPEED
+
     def __init__(self, add_bullet):
         """
         Конструктор корабля
         :param add_bullet: callback на добавление пуль
         """
+        self.ship_stay_surface = load_sprite("ship_stay")
+        self.ship_move_surface = load_sprite("ship_move")
+        self.nothing_surface = load_sprite("nothing")
+
         # last_direction - направление инерции корабля
         self.direction = Vector2(0, -1)
         self.add_bullet = add_bullet
@@ -81,8 +94,8 @@ class Ship(GameObject):
         self.ship_move_flag = False
         super().__init__(velocity=Vector2(0, 0),
                          position=Vector2(FIELD_WIDTH / 2, FIELD_HEIGHT / 2),
-                         sprite=self.ship_stay_sprite,
-                         radius=10)
+                         image=self.ship_stay_surface,
+                         name='ship')
 
     def rotate(self, clockwise):
         """
@@ -107,17 +120,11 @@ class Ship(GameObject):
         bullet = Bullet(self.position, self.bullet_speed, self.direction)
         self.add_bullet(bullet)
 
-    def draw(self, screen):
-        """
-        Отрисовка корабля на экране
-        :param screen: экран
-        """
+    def update(self, *args, **kwargs):
+        self._change_image()
         angle = self.direction.angle_to(Vector2(0, -1))
-        ship = pygame.transform.rotate(self.sprite, angle + 90)
-        ship_rect = ship.get_rect(center=self.position)
-        screen.blit(ship, ship_rect)
-
-        self._change_sprite()
+        self.image = pygame.transform.rotate(self.image, angle + 90)
+        super().update(*args, **kwargs)
 
     def move(self):
         """
@@ -135,22 +142,22 @@ class Ship(GameObject):
         """
         self.afterdeath_sprite_flag = True
 
-    def _change_sprite(self):
+    def _change_image(self):
         """
         Меняет спрайт для анимации движения и при смерти
         """
-        if self.afterdeath_sprite_flag and self.sprite != self.nothing_sprite:
+        if self.afterdeath_sprite_flag and self.image != self.nothing_surface:
             self.afterdeath_sprite_flag = False
-            self.sprite = self.nothing_sprite
+            self.image = self.nothing_surface
             return
 
-        if self.ship_move_flag and self.sprite != self.ship_move_sprite:
+        if self.ship_move_flag and self.image != self.ship_move_surface:
             self.ship_move_flag = False
-            self.sprite = self.ship_move_sprite
+            self.image = self.ship_move_surface
             return
 
-        if self.sprite != self.ship_stay_sprite:
-            self.sprite = self.ship_stay_sprite
+        if self.image != self.ship_stay_surface:
+            self.image = self.ship_stay_surface
 
     def change_bullet_speed(self, is_boost):
         """
@@ -160,7 +167,7 @@ class Ship(GameObject):
             self.bullet_speed = BULLET_SPEED * 3
         else:
             self.bullet_speed = BULLET_SPEED
-        
+
 
 class Asteroid(GameObject):
     """
@@ -182,8 +189,8 @@ class Asteroid(GameObject):
 
         super().__init__(velocity=velocity,
                          position=position,
-                         sprite=sprite_for_asteroid(size_name),
-                         radius=ASTEROID_RADII.get(size_name))
+                         image=sprite_for_asteroid(size_name),
+                         name='asteroid')
 
     def split(self):
         """
@@ -211,8 +218,8 @@ class Bullet(GameObject):
         """
         super().__init__(velocity=speed * direction.copy(),
                          position=position,
-                         sprite=load_sprite('bullet'),
-                         radius=3)
+                         image=load_sprite('bullet'),
+                         name='bullet')
 
     def move(self):
         """
@@ -232,8 +239,8 @@ class UFO(GameObject):
                                        UFO_MAX_VELOCITY)
         super().__init__(velocity=velocity,
                          position=position,
-                         sprite=load_sprite('ufo'),
-                         radius=UFO_RADIUS)
+                         image=load_sprite('ufo'),
+                         name='ufo')
 
     def shoot_at(self, ship_position: Vector2):
         """
@@ -264,9 +271,9 @@ class Booster(GameObject):
         surface = pygame.Surface((2 * 9, 2 * 9), pygame.SRCALPHA)
         super().__init__(velocity=Vector2(0, 0),
                          position=position,
-                         sprite=surface,
-                         radius=9)
+                         image=surface,
+                         name='booster')
         pygame.draw.circle(surface, 'green', (9, 9), 9)
 
     def draw(self, screen):
-        screen.blit(self.sprite, self.position)
+        screen.blit(self.image, self.position)

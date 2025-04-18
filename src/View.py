@@ -100,9 +100,19 @@ class View:
 
         self.screen.fill('black')
 
+
+
         if game_state == GAME_RUN_STATE:
-            for obj in self.model.get_game_objects():
-                obj.draw(self.screen)
+            for group in self.model.get_game_objects_grouped():
+                group.update()
+                # for sprite in group:
+                #     print(sprite)
+                #     try:
+                #         print(f"Sprite Name: {sprite.name}, Position: {sprite.rect.topleft}")
+                #     except AttributeError as e:
+                #         print(e)
+                group.draw(self.screen)
+            # raise AttributeError
             self.print_statistics(self.model.score, self.model.lives)
 
         elif game_state == MAIN_MENU_STATE:
