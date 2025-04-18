@@ -71,7 +71,7 @@ class GameModel:
                 self.ship.position = self.new_ship_pos()
                 set_timer(SHIP_RECOVERY_EVENT, 90, 10)
                 if self.lives <= 0:
-                    pygame.event.post(GAME_OVER_EVENT)
+                    pygame.event.post(pygame.event.Event(GAME_OVER_EVENT))
 
         for bullet in self.ship_bullets:
             for asteroid in self.asteroids:

@@ -1,5 +1,6 @@
 # размеры экрана
 import pygame
+from pygame.event import custom_type
 
 SCREEN_HEIGHT = 600
 SCREEN_WIDTH = 800
@@ -42,10 +43,9 @@ UFO_MIN_VELOCITY = 1
 UFO_MAX_VELOCITY = 2
 UFO_BULLET_SPEED = 3
 # Events
-UFO_UPDATE_EVENT = pygame.USEREVENT + 1
-SHIP_RECOVERY_EVENT = pygame.USEREVENT + 2
-BOOSTER_ENDED = pygame.USEREVENT + 3
-
+UFO_UPDATE_EVENT = custom_type()
+SHIP_RECOVERY_EVENT = custom_type()
+BOOSTER_ENDED = custom_type()
 
 SCORE = {BIG: 20,
          MEDIUM: 50,
@@ -56,8 +56,11 @@ MAIN_MENU_STATE = 0
 GAME_RUN_STATE = 1
 GAME_OVER_STATE = 2
 LEADERBOARD_STATE = 3
+SAVE_RESULT_STATE = 4
 
 # Events for changing game state
-GAME_OVER_EVENT = pygame.event.Event(pygame.USEREVENT + 4)
-GAME_RUN_EVENT = pygame.event.Event(pygame.USEREVENT + 5)
-LEADERBOARD_EVENT = pygame.event.Event(pygame.USEREVENT + 6)
+GAME_OVER_EVENT = custom_type()
+GAME_RUN_EVENT = custom_type()
+LEADERBOARD_EVENT = custom_type()
+SAVE_RESULT_EVENT = custom_type()
+BACK_FROM_LEADERBOARD_EVENT = custom_type()

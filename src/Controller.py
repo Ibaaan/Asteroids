@@ -1,21 +1,22 @@
 import sys
 
 import pygame
-import pygame_widgets
+from pygame_gui import UIManager
 
+from resources.buttons import Buttons
 from resources.settings import CLOCKWISE, COUNTER_CLOCKWISE, ACCELERATE, UFO_UPDATE_EVENT, SHIP_RECOVERY_EVENT, \
     BOOSTER_ENDED, MAIN_MENU_STATE, GAME_RUN_STATE, GAME_OVER_EVENT, GAME_OVER_STATE, GAME_RUN_EVENT, LEADERBOARD_EVENT, \
-    LEADERBOARD_STATE
+    LEADERBOARD_STATE, SAVE_RESULT_EVENT, BACK_FROM_LEADERBOARD_EVENT, SAVE_RESULT_STATE
 from src.Game import GameModel
-from src.View import MenuButtons
+from src.ResultsManager import ResultsManager
 
 
 class Controller:
     def __init__(self, game_model: GameModel, change_game_state_callback,
-                 menu_buttons:MenuButtons):
+                 results_manager:ResultsManager):
         self.change_game_state_callback = change_game_state_callback
         self.model = game_model
-        self.buttons = menu_buttons
+        self.results_manager = results_manager
 
     def process_events(self, game_state):
         """
@@ -23,22 +24,22 @@ class Controller:
         :param game_state: Статус игры, какой контроллер нужно использовать
         """
         events = pygame.event.get()
-        print(len(events))
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             self._change_game_state(event)
-            if game_state == MAIN_MENU_STATE:
-                self.buttons.main_menu_buttons.listen(events)
-            elif game_state == GAME_RUN_STATE:
+
+            if game_state == GAME_RUN_STATE:
                 self._game_model_controller(event)
-            elif game_state == GAME_OVER_STATE:
-                self.buttons.game_over_buttons.listen(events)
-            # self._menu_controller(event)
+            elif game_state == SAVE_RESULT_STATE:
+                self.results_manager.write_name_controller(event, self.model.score)
+
+            Buttons.process_buttons(event)
+
         if game_state == GAME_RUN_STATE:
             self.ship_movement()
-        pygame_widgets.update(events)
+
 
     def _game_model_controller(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -76,10 +77,24 @@ class Controller:
             self.model.on_ship_input(ACCELERATE)
 
     def _change_game_state(self, event):
-        if event == GAME_RUN_EVENT:
+        if event.type == GAME_RUN_EVENT:
             self.change_game_state_callback(GAME_RUN_STATE)
             self.model.reset_variables()
-        elif event == GAME_OVER_EVENT:
+            Buttons.disable_all()
+
+        elif event.type == GAME_OVER_EVENT:
             self.change_game_state_callback(GAME_OVER_STATE)
-        elif event == LEADERBOARD_EVENT:
+            Buttons.show_game_over()
+
+        elif event.type == LEADERBOARD_EVENT:
             self.change_game_state_callback(LEADERBOARD_STATE)
+            Buttons.show_leaderboard(self.results_manager.get_all_scores())
+
+        elif event.type == SAVE_RESULT_EVENT:
+
+            self.change_game_state_callback(SAVE_RESULT_STATE)
+            Buttons.show_save_result()
+
+        elif event.type == BACK_FROM_LEADERBOARD_EVENT:
+            self.change_game_state_callback(MAIN_MENU_STATE)
+            Buttons.show_main_menu()
