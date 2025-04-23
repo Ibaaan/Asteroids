@@ -4,7 +4,7 @@ import random
 from pygame.image import load
 from pygame.math import Vector2
 
-from resources.settings import FIELD_WIDTH, FIELD_HEIGHT
+from resources.constants import FIELD_WIDTH, FIELD_HEIGHT
 
 
 def wrap_position(old_position: Vector2):
@@ -68,3 +68,4 @@ def randomize_vector_direction(vector: Vector2):
     vector.normalize_ip()
     angle_to_rotate = random.randint(-15, 15)
     return vector.rotate(angle_to_rotate)
+

@@ -2,12 +2,13 @@ import pygame
 from pygame.sprite import Group
 from pygame.time import set_timer
 
-from resources.settings import (COUNTER_CLOCKWISE,
-                                CLOCKWISE,
-                                UFO_UPDATE_EVENT,
-                                MIN_ASTEROID_DISTANCE,
-                                BIG, ACCELERATE,
-                                GAME_RUN_STATE, SHIP_RECOVERY_EVENT, GAME_OVER_EVENT, SCORE, UFO_SCORE, BOOSTER_ENDED)
+from resources.constants import (COUNTER_CLOCKWISE,
+                                 CLOCKWISE,
+                                 UFO_UPDATE_EVENT,
+                                 MIN_ASTEROID_DISTANCE,
+                                 BIG, ACCELERATE,
+                                 GAME_RUN_STATE, SHIP_RECOVERY_EVENT, GAME_OVER_EVENT, SCORE, UFO_SCORE, BOOSTER_ENDED,
+                                 AFTER_DEATH_DURATION)
 from resources.utils import get_random_position
 from src.GameObjects import GameObject, Asteroid, Ship, UFO, Booster
 
@@ -26,24 +27,25 @@ class GameModel:
     score: int
     level: int
     boosters: Group
+    is_after_death = False
 
     def __init__(self):
-        self.reset_variables()
-        self._init_game_objects()
+        self.ship = None
+
         set_timer(UFO_UPDATE_EVENT, 1500)
 
     def reset_variables(self):
         """
         Возвращает все переменные в исходное состояние
         """
-        self.lives = 0
+        self.lives = 5
         self.ufos = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
         self.ship_bullets = pygame.sprite.Group()
         self.ufo_bullets = pygame.sprite.Group()
         self.ship = Ship(self.ship_bullets.add)
         self.score = 0
-        self.level = 0
+        self.level = 1
         self.boosters = pygame.sprite.Group()
 
     def update(self, game_state):
@@ -59,37 +61,40 @@ class GameModel:
 
         if not self.asteroids:
             self.level += 1
-            self._init_game_objects()
+            self.init_game_objects()
+        self.is_after_death = False
 
     def _calc_collisions(self):
         """
         Считает коллизии всех игровых объектов
         """
-        # Коллизия корабля с вражескими объектами
+
         if (
-                self.ship.collides_with(self.asteroids, False) or
-                self.ship.collides_with(self.ufo_bullets, False) or
-                self.ship.collides_with(self.ufos, False)
+                # Коллизия корабля с вражескими объектами
+                (self.ship.collides_with(self.asteroids, False) or
+                 self.ship.collides_with(self.ufo_bullets, False) or
+                 self.ship.collides_with(self.ufos, False)) and
+                not self.is_after_death
         ):
             self.lives -= 1
             self.ship.position = self.new_ship_pos()
-            set_timer(SHIP_RECOVERY_EVENT, 90, 10)
+            set_timer(SHIP_RECOVERY_EVENT, 90, AFTER_DEATH_DURATION)
             if self.lives <= 0:
                 pygame.event.post(pygame.event.Event(GAME_OVER_EVENT))
 
         # Коллизия пуль корабля
         for bullet in self.ship_bullets:
-                # Коллизия пуль корабля с астероидами
-                collides_with = bullet.collides_with(self.asteroids, True)
-                for sprite in collides_with:
-                    self.score += SCORE[sprite.size_name]
-                    self.ship_bullets.remove(bullet)
-                    sprite.split()
+            # Коллизия пуль корабля с астероидами
+            collides_with = bullet.collides_with(self.asteroids, True)
+            for sprite in collides_with:
+                self.score += SCORE[sprite.size_name]
+                self.ship_bullets.remove(bullet)
+                sprite.split()
 
-                # Коллизия пуль корабля с нло
-                if bullet.collides_with(self.ufos, True):
-                    self.score += SCORE[UFO_SCORE]
-                    self.ship_bullets.remove(bullet)
+            # Коллизия пуль корабля с нло
+            if bullet.collides_with(self.ufos, True):
+                self.score += SCORE[UFO_SCORE]
+                self.ship_bullets.remove(bullet)
 
         # Коллизия корабля c бустером
         ship_collides_with = self.ship.collides_with(self.boosters, True)
@@ -102,7 +107,7 @@ class GameModel:
             distance_to = 0
             bullet_to_remove = None
             for bullet in self.ship_bullets:
-                if bullet.position.distance_to(self.ship.position ) > distance_to:
+                if bullet.position.distance_to(self.ship.position) > distance_to:
                     bullet_to_remove = bullet
                     distance_to = bullet.position.distance_to(self.ship.position)
             try:
@@ -114,7 +119,7 @@ class GameModel:
         """
         Двигает все объекты на поле
         """
-        for game_object in self._get_game_objects():
+        for game_object in self.get_all_game_objects():
             game_object.move()
 
     def get_game_objects_grouped(self) -> list[Group]:
@@ -122,7 +127,7 @@ class GameModel:
                         self.ufos, self.ufo_bullets, self.boosters]
         return game_objects
 
-    def _get_game_objects(self) -> list[GameObject]:
+    def get_all_game_objects(self) -> list[GameObject]:
         """
         :return: Список всех игровых объектов, как список GameObject объектов
         """
@@ -130,7 +135,7 @@ class GameModel:
                         *self.ufos, *self.ufo_bullets, *self.boosters]
         return game_objects
 
-    def _init_game_objects(self):
+    def init_game_objects(self):
         """
         Инициализация начального состояния игры
         """
@@ -143,7 +148,7 @@ class GameModel:
         Добавляет некоторое количество астероидов в зависимости от уровня
         :param level: уровень
         """
-        for _ in range(2 + level):
+        for _ in range(4 + level):
             while True:
                 position = get_random_position()
                 if (

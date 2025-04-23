@@ -1,10 +1,11 @@
 import sys
+from datetime import datetime
 
 import pygame
-from pygame_gui import UIManager
 
+from resources.SpritesManager import SpritesManager
 from resources.buttons import Buttons
-from resources.settings import CLOCKWISE, COUNTER_CLOCKWISE, ACCELERATE, UFO_UPDATE_EVENT, SHIP_RECOVERY_EVENT, \
+from resources.constants import CLOCKWISE, COUNTER_CLOCKWISE, ACCELERATE, UFO_UPDATE_EVENT, SHIP_RECOVERY_EVENT, \
     BOOSTER_ENDED, MAIN_MENU_STATE, GAME_RUN_STATE, GAME_OVER_EVENT, GAME_OVER_STATE, GAME_RUN_EVENT, LEADERBOARD_EVENT, \
     LEADERBOARD_STATE, SAVE_RESULT_EVENT, BACK_FROM_LEADERBOARD_EVENT, SAVE_RESULT_STATE
 from src.Game import GameModel
@@ -13,8 +14,10 @@ from src.ResultsManager import ResultsManager
 
 class Controller:
     def __init__(self, game_model: GameModel, change_game_state_callback,
-                 results_manager:ResultsManager):
+                 change_pixel_rate_callback,
+                 results_manager: ResultsManager):
         self.change_game_state_callback = change_game_state_callback
+        self.change_pixel_rate_callback = change_pixel_rate_callback
         self.model = game_model
         self.results_manager = results_manager
 
@@ -28,18 +31,19 @@ class Controller:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            Buttons.process_buttons(event)
+
             self._change_game_state(event)
+            self._change_pixel_effect(event)
 
             if game_state == GAME_RUN_STATE:
                 self._game_model_controller(event)
             elif game_state == SAVE_RESULT_STATE:
                 self.results_manager.write_name_controller(event, self.model.score)
 
-            Buttons.process_buttons(event)
-
         if game_state == GAME_RUN_STATE:
             self.ship_movement()
-
 
     def _game_model_controller(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -49,6 +53,7 @@ class Controller:
             self.model.on_ufo_update()
         elif event.type == SHIP_RECOVERY_EVENT:
             self.model.after_death_animation()
+            self.model.is_after_death = True
         elif event.type == BOOSTER_ENDED:
             self.model.booster_ended()
 
@@ -80,6 +85,7 @@ class Controller:
         if event.type == GAME_RUN_EVENT:
             self.change_game_state_callback(GAME_RUN_STATE)
             self.model.reset_variables()
+            self.model.init_game_objects()
             Buttons.disable_all()
 
         elif event.type == GAME_OVER_EVENT:
@@ -98,3 +104,14 @@ class Controller:
         elif event.type == BACK_FROM_LEADERBOARD_EVENT:
             self.change_game_state_callback(MAIN_MENU_STATE)
             Buttons.show_main_menu()
+
+    def _change_pixel_effect(self, event):
+
+        if event.type != pygame.MOUSEBUTTONUP:
+            return
+        pixel_rate = Buttons.pixel_rate()
+        if pixel_rate != -1:
+            curr_time = datetime.now()
+            SpritesManager.pixelate_sprites(pixel_rate)
+            jkfdsa = datetime.now()
+            print("Time passed", jkfdsa - curr_time)

@@ -2,7 +2,7 @@ import json
 
 import pygame
 
-from resources.settings import SCREEN_WIDTH, SCREEN_HEIGHT, LEADERBOARD_EVENT
+from resources.constants import SCREEN_WIDTH, SCREEN_HEIGHT, LEADERBOARD_EVENT
 
 
 class ResultsManager:

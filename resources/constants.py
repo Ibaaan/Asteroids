@@ -1,6 +1,8 @@
 # размеры экрана
-import pygame
+from enum import Enum, auto
+
 from pygame.event import custom_type
+
 
 SCREEN_HEIGHT = 600
 SCREEN_WIDTH = 800
@@ -14,6 +16,7 @@ SHIP_ANGULAR_VELOCITY = 4
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = 2
 ACCELERATE = 3
+AFTER_DEATH_DURATION = 10
 # коэффициент замедления корабля
 ACCELERATION_FACTOR = 0.99
 # скорость настолько маленькая, что считающуюся 0
@@ -64,3 +67,24 @@ GAME_RUN_EVENT = custom_type()
 LEADERBOARD_EVENT = custom_type()
 SAVE_RESULT_EVENT = custom_type()
 BACK_FROM_LEADERBOARD_EVENT = custom_type()
+SLIDER_DRAGGING_EVENT = custom_type()
+
+NO_PIXEL = 0
+
+
+class SpritesEnum(Enum):
+    booster = auto()
+    ship_stay = auto()
+    nothing = auto()
+    ship_move = auto()
+    asteroid_b1 = auto()
+    asteroid_b2 = auto()
+    asteroid_b3 = auto()
+    asteroid_m1 = auto()
+    asteroid_m2 = auto()
+    asteroid_m3 = auto()
+    asteroid_s1 = auto()
+    asteroid_s2 = auto()
+    asteroid_s3 = auto()
+    bullet = auto()
+    ufo = auto()

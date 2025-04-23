@@ -1,7 +1,8 @@
 import pygame
+from pygame import Surface
 
 from resources.buttons import Buttons
-from resources.settings import GAME_RUN_STATE, SCREEN_WIDTH, MAIN_MENU_STATE, GAME_OVER_STATE, SCREEN_HEIGHT, \
+from resources.constants import GAME_RUN_STATE, SCREEN_WIDTH, MAIN_MENU_STATE, GAME_OVER_STATE, SCREEN_HEIGHT, \
     SAVE_RESULT_STATE, LEADERBOARD_STATE
 from src.Game import GameModel
 from src.ResultsManager import ResultsManager
@@ -81,15 +82,13 @@ class View:
     Класс изображающий объекты на экране
     """
 
-    def __init__(self, model: GameModel, results_manager:ResultsManager):
+    def __init__(self, model: GameModel, results_manager: ResultsManager):
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Asteroids")
         self.model = model
         self.results_manager = results_manager
         Buttons.init_buttons()
-
-
 
     def draw(self, game_state: int):
         """
@@ -100,23 +99,19 @@ class View:
 
         self.screen.fill('black')
 
-
-
         if game_state == GAME_RUN_STATE:
             for group in self.model.get_game_objects_grouped():
                 group.update()
-                # for sprite in group:
-                #     print(sprite)
-                #     try:
-                #         print(f"Sprite Name: {sprite.name}, Position: {sprite.rect.topleft}")
-                #     except AttributeError as e:
-                #         print(e)
+
                 group.draw(self.screen)
-            # raise AttributeError
             self.print_statistics(self.model.score, self.model.lives)
 
         elif game_state == MAIN_MENU_STATE:
             self._show_game_name()
+            game_name = (pygame.font.SysFont('couriernew', 40)
+                         .render('Graphics', True, 'white'))
+            game_name_rect = game_name.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 160 + 30))
+            self.screen.blit(game_name, game_name_rect)
 
         elif game_state == GAME_OVER_STATE:
             self.game_over_screen(self.model.score)
@@ -163,6 +158,12 @@ class View:
 
     def _show_leaderboard_name(self):
         leaderboard_name = (pygame.font.SysFont('couriernew', 50)
-                     .render('Leaderboard', True, 'white'))
+                            .render('Leaderboard', True, 'white'))
         leaderboard_rect = leaderboard_name.get_rect(center=(SCREEN_WIDTH / 2, 50))
         self.screen.blit(leaderboard_name, leaderboard_rect)
+
+    def change_pixel_rate(self, pixel_rate):
+        print("Pixelazate", pixel_rate)
+        # for game_object in self.model.get_all_game_objects():
+        #     print(game_object.__class__)
+        #     game_object.update_image(pixel_rate)
