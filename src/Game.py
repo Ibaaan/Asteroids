@@ -1,14 +1,17 @@
 import pygame
-from pygame.sprite import Group
+from pygame import Vector2
+from pygame.sprite import Group, Sprite
 from pygame.time import set_timer
 
+from resources.SpritesManager import SpritesManager
 from resources.constants import (COUNTER_CLOCKWISE,
                                  CLOCKWISE,
                                  UFO_UPDATE_EVENT,
                                  MIN_ASTEROID_DISTANCE,
                                  BIG, ACCELERATE,
                                  GAME_RUN_STATE, SHIP_RECOVERY_EVENT, GAME_OVER_EVENT, SCORE, UFO_SCORE, BOOSTER_ENDED,
-                                 AFTER_DEATH_DURATION)
+                                 AFTER_DEATH_DURATION, SCREEN_WIDTH, SCREEN_HEIGHT, FIELD_WIDTH,
+                                 FIELD_HEIGHT)
 from resources.utils import get_random_position
 from src.GameObjects import GameObject, Asteroid, Ship, UFO, Booster
 
@@ -115,6 +118,18 @@ class GameModel:
             finally:
                 pass
 
+        if len(self.ufo_bullets) > 4:
+            distance_to = 0
+            bullet_to_remove = None
+            for bullet in self.ufo_bullets:
+                if bullet.position.distance_to(self.ship.position) > distance_to:
+                    bullet_to_remove = bullet
+                    distance_to = bullet.position.distance_to(self.ship.position)
+            try:
+                self.ufo_bullets.remove(bullet_to_remove)
+            finally:
+                pass
+
     def _move_objects(self):
         """
         Двигает все объекты на поле
@@ -122,10 +137,9 @@ class GameModel:
         for game_object in self.get_all_game_objects():
             game_object.move()
 
-    def get_game_objects_grouped(self) -> list[Group]:
-        game_objects = [self.asteroids, self.ship_bullets, pygame.sprite.Group(self.ship),
-                        self.ufos, self.ufo_bullets, self.boosters]
-        return game_objects
+    def get_camera_group(self):
+        return GameView(*self.asteroids, *self.ship_bullets,
+                        *self.ufos, *self.ufo_bullets, *self.boosters)
 
     def get_all_game_objects(self) -> list[GameObject]:
         """
@@ -211,3 +225,38 @@ class GameModel:
             self.ship.rotate(False)
         elif action_id == ACCELERATE:
             self.ship.accelerate()
+
+
+class GameView(pygame.sprite.Group):
+    half_w = SCREEN_WIDTH // 2
+    half_h = SCREEN_HEIGHT // 2
+
+    def __init__(self, *sprites):
+        super().__init__(*sprites)
+        self.display_surface = pygame.display.get_surface()
+
+        self.offset = pygame.math.Vector2()
+
+    def custom_draw(self, player: Sprite):
+        self._center_target_camera(player)
+
+        self._draw_background()
+
+        for sprite in self.sprites():
+            self._draw(sprite)
+
+        self.display_surface.blit(player.image, player.rect.topleft - self.offset)
+
+    def _center_target_camera(self, target):
+        self.offset.x = target.rect.centerx - self.half_w
+        self.offset.y = target.rect.centery - self.half_h
+
+    def _draw(self, sprite: Sprite):
+        for x in (-1, 0, 1):
+            for y in (-1, 0, 1):
+                offset_pos = (sprite.rect.topleft - self.offset
+                              + Vector2(x * FIELD_WIDTH, y * FIELD_HEIGHT))
+                self.display_surface.blit(sprite.image, offset_pos)
+
+    def _draw_background(self):
+        self._draw(SpritesManager.get_background_sprite())

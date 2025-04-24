@@ -19,7 +19,7 @@ class AsteroidsGame:
         SpritesManager.init_default_sprites()
         self.model = GameModel()
         self.view = View(self.model, results_manager)
-        self.controller = Controller(self.model, self.change_game_state, self.change_pixel_rate, results_manager)
+        self.controller = Controller(self.model, self.change_game_state, results_manager)
         self.game_state: int = MAIN_MENU_STATE
 
     def loop(self):
@@ -33,6 +33,3 @@ class AsteroidsGame:
 
     def change_game_state(self, state_name):
         self.game_state = state_name
-
-    def change_pixel_rate(self, pixel_rate):
-        self.view.change_pixel_rate(pixel_rate)

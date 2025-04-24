@@ -7,11 +7,11 @@ from pygame.event import custom_type
 SCREEN_HEIGHT = 600
 SCREEN_WIDTH = 800
 
-FIELD_HEIGHT = 600
-FIELD_WIDTH = 800
+FIELD_HEIGHT = 768
+FIELD_WIDTH = 1024
 
 # константы для корабля
-SHIP_MAX_VELOCITY = 0.2
+SHIP_MAX_VELOCITY = 0.15
 SHIP_ANGULAR_VELOCITY = 4
 CLOCKWISE = 1
 COUNTER_CLOCKWISE = 2
@@ -88,3 +88,4 @@ class SpritesEnum(Enum):
     asteroid_s3 = auto()
     bullet = auto()
     ufo = auto()
+    background = auto()

@@ -1,10 +1,9 @@
 import pygame
-from pygame import Surface
 
 from resources.buttons import Buttons
 from resources.constants import GAME_RUN_STATE, SCREEN_WIDTH, MAIN_MENU_STATE, GAME_OVER_STATE, SCREEN_HEIGHT, \
     SAVE_RESULT_STATE, LEADERBOARD_STATE
-from src.Game import GameModel
+from src.Game import GameModel, GameView
 from src.ResultsManager import ResultsManager
 
 
@@ -97,13 +96,18 @@ class View:
         time_delta = self.clock.tick(60) / 1000.0
         Buttons.MANAGER.update(time_delta)
 
-        self.screen.fill('black')
+        self.screen.fill("black")
 
         if game_state == GAME_RUN_STATE:
-            for group in self.model.get_game_objects_grouped():
-                group.update()
+            ship = self.model.ship
 
-                group.draw(self.screen)
+            view_game_group: GameView = (self.model.get_camera_group())
+
+            view_game_group.update()
+            ship.update()
+
+            view_game_group.custom_draw(ship)
+
             self.print_statistics(self.model.score, self.model.lives)
 
         elif game_state == MAIN_MENU_STATE:
@@ -161,9 +165,3 @@ class View:
                             .render('Leaderboard', True, 'white'))
         leaderboard_rect = leaderboard_name.get_rect(center=(SCREEN_WIDTH / 2, 50))
         self.screen.blit(leaderboard_name, leaderboard_rect)
-
-    def change_pixel_rate(self, pixel_rate):
-        print("Pixelazate", pixel_rate)
-        # for game_object in self.model.get_all_game_objects():
-        #     print(game_object.__class__)
-        #     game_object.update_image(pixel_rate)

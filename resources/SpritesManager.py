@@ -3,9 +3,10 @@ from copy import copy
 
 import pygame
 from PIL import Image, ImageStat, ImageFile
-from pygame import Surface
+from pygame import Surface, Rect
+from pygame.sprite import Sprite
 
-from resources.constants import BIG, MEDIUM, SMALL, SpritesEnum
+from resources.constants import BIG, MEDIUM, SMALL, SpritesEnum, FIELD_HEIGHT, FIELD_WIDTH
 from resources.utils import load_sprite
 
 
@@ -66,6 +67,7 @@ class SpritesManager:
         cls.raw_sprites[SpritesEnum.bullet] = load_sprite("bullet")
         cls.raw_sprites[SpritesEnum.ufo] = load_sprite("ufo")
         cls.raw_sprites[SpritesEnum.booster] = pygame.Surface((2 * 9, 2 * 9), pygame.SRCALPHA)
+        cls.raw_sprites[SpritesEnum.background] = load_sprite("background")
 
         cls.pixel_sprites = copy(cls.raw_sprites)
 
@@ -104,3 +106,10 @@ class SpritesManager:
     @classmethod
     def get_raw_sprite(cls, sprite):
         return cls.raw_sprites[sprite]
+
+    @classmethod
+    def get_background_sprite(cls):
+        background = Sprite()
+        background.image = cls.pixel_sprites[SpritesEnum.background]
+        background.rect = Rect(0, 0, FIELD_WIDTH, FIELD_HEIGHT)
+        return background

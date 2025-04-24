@@ -1,2 +1,4 @@
-pygama==2.6.1
-pygame-widgets=1.1.7
+pygame==2.6.1
+pygame-ce==2.5.3
+pygame_gui==0.6.13
+
