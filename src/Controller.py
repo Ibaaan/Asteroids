@@ -14,10 +14,8 @@ from src.ResultsManager import ResultsManager
 
 class Controller:
     def __init__(self, game_model: GameModel, change_game_state_callback,
-                 change_pixel_rate_callback,
-                 results_manager: ResultsManager):
+                                  results_manager: ResultsManager):
         self.change_game_state_callback = change_game_state_callback
-        self.change_pixel_rate_callback = change_pixel_rate_callback
         self.model = game_model
         self.results_manager = results_manager
 

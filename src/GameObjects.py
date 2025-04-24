@@ -230,12 +230,6 @@ class Bullet(GameObject):
                          image=SpritesManager.get_sprite(SpritesEnum.bullet),
                          sprite_id=SpritesEnum.bullet)
 
-    def move(self):
-        """
-        Перемещает пулю
-        """
-        self.position = self.position + self.velocity
-
 
 class UFO(GameObject):
     """

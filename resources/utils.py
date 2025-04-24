@@ -68,4 +68,3 @@ def randomize_vector_direction(vector: Vector2):
     vector.normalize_ip()
     angle_to_rotate = random.randint(-15, 15)
     return vector.rotate(angle_to_rotate)
-
